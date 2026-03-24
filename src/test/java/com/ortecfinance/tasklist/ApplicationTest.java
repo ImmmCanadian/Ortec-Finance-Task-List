@@ -50,6 +50,7 @@ public final class ApplicationTest {
     @Test
     void it_works() throws IOException {
         execute("show");
+        readLines("No tasks found.");
 
         execute("add project secrets");
         execute("add task secrets Eat more donuts.");
@@ -104,6 +105,36 @@ public final class ApplicationTest {
         readLines("Could not find a task with an ID of 999.");
         execute("deadline 1 not-a-date");
         readLines("Invalid date format. Use dd-MM-yyyy.");
+        execute("quit");
+    }
+
+    @Test
+    void it_shows_tasks_grouped_by_deadline_in_chronological_order() throws IOException {
+        execute("add project secrets");
+        execute("add task secrets Eat more donuts.");
+        execute("add project training");
+        execute("add task training Four Elements of Simple Design");
+        execute("add task training SOLID");
+
+        execute("deadline 1 20-12-2025");
+        execute("deadline 2 15-11-2025");
+
+        execute("view-by-deadline");
+        readLines(
+            "15-11-2025:",
+            "    training",
+            "        [ ] 2: Four Elements of Simple Design",
+            "",
+            "20-12-2025:",
+            "    secrets",
+            "        [ ] 1: Eat more donuts.",
+            "",
+            "No deadline:",
+            "    training",
+            "        [ ] 3: SOLID",
+            ""
+        );
+
         execute("quit");
     }
 

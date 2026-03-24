@@ -98,4 +98,41 @@ class TaskServiceTest {
         );
     }
 
+    @Test
+    void it_groups_tasks_by_deadline_then_project() {
+        service.addProject("secrets");
+        service.addProject("training");
+        service.addTask("secrets", "Eat more donuts.");
+        service.addTask("training", "Learn TDD");
+        service.addTask("training", "SOLID");
+
+        service.setDeadline(1, LocalDate.of(2025, 12, 20));
+        service.setDeadline(2, LocalDate.of(2025, 11, 15));
+
+        Map<LocalDate, Map<String, List<Task>>> grouped = service.getTasksGroupedByDeadline();
+        assertEquals(3, grouped.size());
+
+        var iterator = grouped.entrySet().iterator();
+        var first = iterator.next();
+        assertEquals(LocalDate.of(2025, 11, 15), first.getKey());
+        assertTrue(first.getValue().containsKey("training"));
+        assertEquals(1, first.getValue().get("training").size());
+
+        var second = iterator.next();
+        assertEquals(LocalDate.of(2025, 12, 20), second.getKey());
+        assertTrue(second.getValue().containsKey("secrets"));
+
+        var third = iterator.next();
+        assertNull(third.getKey());
+        assertTrue(third.getValue().containsKey("training"));
+        assertEquals("SOLID", third.getValue().get("training").get(0).getDescription());
+    }
+
+    @Test
+    void it_returns_no_deadline_groups_when_there_are_no_tasks() {
+        Map<LocalDate, Map<String, List<Task>>> grouped = service.getTasksGroupedByDeadline();
+        assertTrue(grouped.isEmpty());
+    }
+
+
 }
