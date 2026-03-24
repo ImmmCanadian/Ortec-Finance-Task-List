@@ -87,11 +87,19 @@ public class TaskService {
         res.put(null, noDeadline);
     }
     return res;
-}
+    }
 
     public Map<String, List<Task>> getAllProjects() {
         return Collections.unmodifiableMap(projects);
     }
+
+    public Task getTaskById(long taskId) {
+        Task task = tasksById.get(taskId);
+        if (task == null) {
+            throw new TaskNotFoundException(taskId);
+        }
+        return task;
+}
 
     private long nextId() {
         return ++lastId;

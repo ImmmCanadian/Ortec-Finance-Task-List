@@ -12,6 +12,11 @@ import java.util.*;
 public final class TaskList implements Runnable {
     private static final String QUIT = "quit";
     private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+    private static final String ADD_PROJECT_USAGE = "Usage: add project <project name>";
+    private static final String ADD_TASK_USAGE = "Usage: add task <project name> <task description>";
+    private static final String CHECK_USAGE = "Usage: check <task ID>";
+    private static final String UNCHECK_USAGE = "Usage: uncheck <task ID>";
+    private static final String DEADLINE_USAGE = "Usage: deadline <task ID> <date>";
     private final BufferedReader in;
     private final PrintWriter out;
     private final TaskService service;
@@ -55,18 +60,18 @@ public final class TaskList implements Runnable {
                 show();
                 break;
             case "add":
-                add(commandRest[1]);
+                add(commandRest.length > 1 ? commandRest[1] : "");
                 break;
             case "check":
-                check(commandRest[1]);
+                check(commandRest.length > 1 ? commandRest[1] : "");
                 break;
             case "uncheck":
-                uncheck(commandRest[1]);
+                uncheck(commandRest.length > 1 ? commandRest[1] : "");
                 break;
             case "deadline":             
-                deadline(commandRest[1]); 
+                deadline(commandRest.length > 1 ? commandRest[1] : ""); 
                 break;
-            case "view-by-deadline":     
+            case "view_by_deadline":     
                 viewByDeadline();        
                 break; 
             case "today":     
@@ -139,34 +144,66 @@ public final class TaskList implements Runnable {
 
 
     private void add(String commandLine) {
+        if (commandLine == null || commandLine.isBlank()) {
+            out.println(ADD_PROJECT_USAGE);
+            out.println(ADD_TASK_USAGE);
+            return;
+        }
+
         String[] subcommandRest = commandLine.split(" ", 2);
         String subcommand = subcommandRest[0];
+
         if (subcommand.equals("project")) {
-            service.addProject(subcommandRest[1]);
+            if (subcommandRest.length < 2 || subcommandRest[1].isBlank()) {
+                out.println(ADD_PROJECT_USAGE);
+                return;
+            }
+            String projectName = subcommandRest[1];
+            service.addProject(projectName);
+            out.printf("Added project \"%s\".%n", projectName);
         } else if (subcommand.equals("task")) {
+            if (subcommandRest.length < 2 || subcommandRest[1].isBlank()) {
+                out.println(ADD_TASK_USAGE);
+                return;
+            }
             String[] projectTask = subcommandRest[1].split(" ", 2);
+            if (projectTask.length < 2 || projectTask[0].isBlank() || projectTask[1].isBlank()) {
+                out.println(ADD_TASK_USAGE);
+                return;
+            }
             try{
-                service.addTask(projectTask[0], projectTask[1]);
+                Task task = service.addTask(projectTask[0], projectTask[1]);
+                out.printf("Added task %d to \"%s\".%n", task.getId(), projectTask[0]);
             }
             catch(ProjectNotFoundException e){
                 out.println(e.getMessage());
             }
-            
+        } else {
+            out.println(ADD_PROJECT_USAGE);
+            out.println(ADD_TASK_USAGE);
         }
     }
 
     private void check(String idString) {
-        setDone(idString, true);
+        setDone(idString, true, CHECK_USAGE);
     }
 
     private void uncheck(String idString) {
-        setDone(idString, false);
+        setDone(idString, false, UNCHECK_USAGE);
     }
 
-    private void setDone(String idString, boolean done){
-        int id = Integer.parseInt(idString);
+    private void setDone(String idString, boolean done, String usageMessage){
+        if (idString == null || idString.isBlank()) {
+            out.println(usageMessage);
+            return;
+        }
+
         try {
+            long id = Long.parseLong(idString);
             service.setDone(id, done);
+        }
+        catch (NumberFormatException e) {
+            out.println(usageMessage);
         } 
         catch (TaskNotFoundException e) {
             out.println(e.getMessage());
@@ -174,11 +211,25 @@ public final class TaskList implements Runnable {
     }
 
     private void deadline(String commandLine) {
+        if (commandLine == null || commandLine.isBlank()) {
+            out.println(DEADLINE_USAGE);
+            return;
+        }
+
         String[] parts = commandLine.split(" ", 2);
-        long id = Long.parseLong(parts[0]);
+        if (parts.length < 2 || parts[1].isBlank()) {
+            out.println(DEADLINE_USAGE);
+            return;
+        }
+
         try {
+            long id = Long.parseLong(parts[0]);
             LocalDate date = LocalDate.parse(parts[1], DATE_FORMAT);
             service.setDeadline(id, date);
+            out.printf("Set deadline for task %d to %s.%n", id, date.format(DATE_FORMAT));
+        }
+        catch (NumberFormatException e) {
+            out.println(DEADLINE_USAGE);
         } 
         catch (DateTimeParseException e) {
             out.println("Invalid date format. Use dd-MM-yyyy.");
@@ -196,8 +247,9 @@ public final class TaskList implements Runnable {
         out.println("  check <task ID>");
         out.println("  uncheck <task ID>");
         out.println("  deadline <task ID> <date>");
-        out.println("  view-by-deadline");
+        out.println("  view_by_deadline");
         out.println("  today");
+        out.println("  quit");
         out.println();
     }
 

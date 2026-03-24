@@ -48,16 +48,10 @@ public class ProjectController {
     public TaskResponse updateTaskDeadline(@PathVariable String projectName, @PathVariable long taskId, @RequestParam String deadline) {
         LocalDate date = LocalDate.parse(deadline, DATE_FORMAT);
         service.setDeadline(taskId, date);
-
-        for (Task task : service.getAllProjects().get(projectName)) {
-            if (task.getId() == taskId) {
-                return new TaskResponse(task);
-            }
-        }
-        return null;
+        return new TaskResponse(service.getTaskById(taskId));
     }
 
-    @GetMapping("/view-by-deadline")
+    @GetMapping("/view_by_deadline")
     public Map<String, List<ProjectResponse>> getTasksByDeadline() {
         Map<LocalDate, Map<String, List<Task>>> grouped = service.getTasksGroupedByDeadline();
         Map<String, List<ProjectResponse>> result = new LinkedHashMap<>();

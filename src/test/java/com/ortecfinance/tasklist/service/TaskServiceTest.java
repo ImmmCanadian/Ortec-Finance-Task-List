@@ -134,5 +134,19 @@ class TaskServiceTest {
         assertTrue(grouped.isEmpty());
     }
 
+    @Test
+    void it_returns_tasks_due_today_in_a_short_demo() {
+        LocalDate today = LocalDate.now();
+        service.addProject("training");
+        service.addTask("training", "Due today demo task");
+        service.setDeadline(1, today);
+
+        Map<String, List<Task>> result = service.getTasksDueToday();
+
+        assertTrue(result.containsKey("training"));
+        assertEquals(1, result.get("training").size());
+        assertEquals("Due today demo task", result.get("training").get(0).getDescription());
+    }
+
 
 }

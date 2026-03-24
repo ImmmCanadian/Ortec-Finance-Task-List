@@ -80,7 +80,7 @@ class RestApiTest {
 
     @Test
     void it_returns_grouped_tasks_for_view_by_deadline() throws Exception {
-        mockMvc.perform(get("/projects/view-by-deadline"))
+                mockMvc.perform(get("/projects/view_by_deadline"))
                 .andExpect(status().isOk());
     }
 

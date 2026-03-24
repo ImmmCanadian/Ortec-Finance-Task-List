@@ -53,8 +53,11 @@ public final class ApplicationTest {
         readLines("No tasks found.");
 
         execute("add project secrets");
+        readLines("Added project \"secrets\".");
         execute("add task secrets Eat more donuts.");
+        readLines("Added task 1 to \"secrets\".");
         execute("add task secrets Destroy all humans.");
+        readLines("Added task 2 to \"secrets\".");
 
         execute("show");
         readLines(
@@ -65,12 +68,19 @@ public final class ApplicationTest {
         );
 
         execute("add project training");
+        readLines("Added project \"training\".");
         execute("add task training Four Elements of Simple Design");
+        readLines("Added task 3 to \"training\".");
         execute("add task training SOLID");
+        readLines("Added task 4 to \"training\".");
         execute("add task training Coupling and Cohesion");
+        readLines("Added task 5 to \"training\".");
         execute("add task training Primitive Obsession");
+        readLines("Added task 6 to \"training\".");
         execute("add task training Outside-In TDD");
+        readLines("Added task 7 to \"training\".");
         execute("add task training Interaction-Driven Design");
+        readLines("Added task 8 to \"training\".");
 
         execute("check 1");
         execute("check 3");
@@ -99,8 +109,13 @@ public final class ApplicationTest {
     @Test
     void it_handles_the_deadline_command_for_valid_and_invalid_input() throws IOException {
         execute("add project training");
+        readLines("Added project \"training\".");
         execute("add task training Write integration tests");
+        readLines("Added task 1 to \"training\".");
         execute("deadline 1 15-01-2025");
+        readLines("Set deadline for task 1 to 15-01-2025.");
+        execute("deadline 2");
+        readLines("Usage: deadline <task ID> <date>");
         execute("deadline 999 15-01-2025");
         readLines("Could not find a task with an ID of 999.");
         execute("deadline 1 not-a-date");
@@ -109,17 +124,53 @@ public final class ApplicationTest {
     }
 
     @Test
+    void it_handles_check_and_uncheck_commands_when_task_id_is_missing() throws IOException {
+        execute("check");
+        readLines("Usage: check <task ID>");
+        execute("uncheck");
+        readLines("Usage: uncheck <task ID>");
+        execute("quit");
+    }
+
+    @Test
+    void it_handles_add_commands_when_required_arguments_are_missing() throws IOException {
+        execute("add");
+        readLines(
+            "Usage: add project <project name>",
+            "Usage: add task <project name> <task description>"
+        );
+
+        execute("add project");
+        readLines("Usage: add project <project name>");
+
+        execute("add task");
+        readLines("Usage: add task <project name> <task description>");
+
+        execute("add task training");
+        readLines("Usage: add task <project name> <task description>");
+
+        execute("quit");
+    }
+
+    @Test
     void it_shows_tasks_grouped_by_deadline_in_chronological_order() throws IOException {
         execute("add project secrets");
+        readLines("Added project \"secrets\".");
         execute("add task secrets Eat more donuts.");
+        readLines("Added task 1 to \"secrets\".");
         execute("add project training");
+        readLines("Added project \"training\".");
         execute("add task training Four Elements of Simple Design");
+        readLines("Added task 2 to \"training\".");
         execute("add task training SOLID");
+        readLines("Added task 3 to \"training\".");
 
         execute("deadline 1 20-12-2025");
+        readLines("Set deadline for task 1 to 20-12-2025.");
         execute("deadline 2 15-11-2025");
+        readLines("Set deadline for task 2 to 15-11-2025.");
 
-        execute("view-by-deadline");
+        execute("view_by_deadline");
         readLines(
             "15-11-2025:",
             "    training",
