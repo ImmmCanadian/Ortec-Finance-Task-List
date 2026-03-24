@@ -65,6 +65,9 @@ public final class TaskList implements Runnable {
                 break;
             case "deadline":             
                 deadline(commandRest[1]); 
+                break;
+            case "today":     
+                today();      
                 break;     
             case "help":
                 help();
@@ -77,6 +80,21 @@ public final class TaskList implements Runnable {
 
     private void show() {
         for (Map.Entry<String, List<Task>> project : service.getAllProjects().entrySet()) {
+            out.println(project.getKey());
+            for (Task task : project.getValue()) {
+                out.printf("    [%c] %d: %s%n", (task.isDone() ? 'x' : ' '), task.getId(), task.getDescription());
+            }
+            out.println();
+        }
+    }
+
+    private void today() {
+        Map<String, List<Task>> todayTasks = service.getTasksDueToday();
+        if (todayTasks.isEmpty()) {
+            out.println("No tasks due today.");
+            return;
+        }
+        for (Map.Entry<String, List<Task>> project : todayTasks.entrySet()) {
             out.println(project.getKey());
             for (Task task : project.getValue()) {
                 out.printf("    [%c] %d: %s%n", (task.isDone() ? 'x' : ' '), task.getId(), task.getDescription());
@@ -143,6 +161,7 @@ public final class TaskList implements Runnable {
         out.println("  check <task ID>");
         out.println("  uncheck <task ID>");
         out.println("  deadline <task ID> <date>");
+        out.println("  today");
         out.println();
     }
 

@@ -46,6 +46,23 @@ public class TaskService {
         task.setDeadline(deadline);
     }
 
+    public Map<String, List<Task>> getTasksDueToday() {
+        LocalDate today = LocalDate.now();
+        Map<String, List<Task>> res = new LinkedHashMap<>();
+        for (Map.Entry<String, List<Task>> entry : projects.entrySet()) {
+            List<Task> dueTasks = new ArrayList<>();
+            for (Task task : entry.getValue()) {
+                if (today.equals(task.getDeadline())) {
+                    dueTasks.add(task);
+                }
+            }
+            if (!dueTasks.isEmpty()) {
+                res.put(entry.getKey(), dueTasks);
+            }
+        }
+        return res;
+    }
+
     public Map<String, List<Task>> getAllProjects() {
         return Collections.unmodifiableMap(projects);
     }
