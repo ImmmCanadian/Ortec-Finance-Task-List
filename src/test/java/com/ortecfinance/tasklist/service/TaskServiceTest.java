@@ -6,6 +6,7 @@ import com.ortecfinance.tasklist.exception.TaskNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -77,6 +78,23 @@ class TaskServiceTest {
     void it_throws_when_marking_a_missing_task() {
         assertThrows(TaskNotFoundException.class, () ->
             service.setDone(999, true)
+        );
+    }
+
+    @Test
+    void it_sets_a_deadline_for_an_existing_task() {
+        service.addProject("training");
+        service.addTask("training", "Outside-In TDD kata");
+        LocalDate deadline = LocalDate.of(2025, 1, 15);
+        service.setDeadline(1, deadline);
+        assertEquals(deadline, service.getAllProjects().get("training").get(0).getDeadline());
+    }
+
+    @Test
+    void it_throws_when_setting_a_deadline_for_a_missing_task() {
+        service.addProject("training");
+        assertThrows(TaskNotFoundException.class, () ->
+            service.setDeadline(999, LocalDate.of(2025, 1, 15))
         );
     }
 

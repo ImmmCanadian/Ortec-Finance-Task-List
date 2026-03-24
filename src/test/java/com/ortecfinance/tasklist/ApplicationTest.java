@@ -95,6 +95,18 @@ public final class ApplicationTest {
         execute("quit");
     }
 
+    @Test
+    void it_handles_the_deadline_command_for_valid_and_invalid_input() throws IOException {
+        execute("add project training");
+        execute("add task training Write integration tests");
+        execute("deadline 1 15-01-2025");
+        execute("deadline 999 15-01-2025");
+        readLines("Could not find a task with an ID of 999.");
+        execute("deadline 1 not-a-date");
+        readLines("Invalid date format. Use dd-MM-yyyy.");
+        execute("quit");
+    }
+
     private void execute(String command) throws IOException {
         read(PROMPT);
         write(command);

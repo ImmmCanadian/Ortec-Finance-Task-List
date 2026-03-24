@@ -1,5 +1,6 @@
 package com.ortecfinance.tasklist.service;
 import java.util.*;
+import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import com.ortecfinance.tasklist.Task;
 import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
@@ -35,6 +36,14 @@ public class TaskService {
             throw new TaskNotFoundException(id);
         }
         task.setDone(done);
+    }
+
+    public void setDeadline(long taskId, LocalDate deadline){
+        Task task = tasksById.get(taskId);
+        if (task == null){
+            throw new TaskNotFoundException(taskId);
+        }
+        task.setDeadline(deadline);
     }
 
     public Map<String, List<Task>> getAllProjects() {

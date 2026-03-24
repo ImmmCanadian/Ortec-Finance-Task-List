@@ -3,11 +3,15 @@ import com.ortecfinance.tasklist.exception.ProjectNotFoundException;
 import com.ortecfinance.tasklist.exception.TaskNotFoundException;
 import com.ortecfinance.tasklist.service.TaskService;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.io.*;
 import java.util.*;
 
 public final class TaskList implements Runnable {
     private static final String QUIT = "quit";
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     private final BufferedReader in;
     private final PrintWriter out;
     private final TaskService service;
@@ -59,6 +63,9 @@ public final class TaskList implements Runnable {
             case "uncheck":
                 uncheck(commandRest[1]);
                 break;
+            case "deadline":             
+                deadline(commandRest[1]); 
+                break;     
             case "help":
                 help();
                 break;
@@ -113,6 +120,21 @@ public final class TaskList implements Runnable {
         }
     }
 
+    private void deadline(String commandLine) {
+        String[] parts = commandLine.split(" ", 2);
+        long id = Long.parseLong(parts[0]);
+        try {
+            LocalDate date = LocalDate.parse(parts[1], DATE_FORMAT);
+            service.setDeadline(id, date);
+        } 
+        catch (DateTimeParseException e) {
+            out.println("Invalid date format. Use dd-MM-yyyy.");
+        } 
+        catch (TaskNotFoundException e) {
+            out.println(e.getMessage());
+        }
+    }
+
     private void help() {
         out.println("Commands:");
         out.println("  show");
@@ -120,6 +142,7 @@ public final class TaskList implements Runnable {
         out.println("  add task <project name> <task description>");
         out.println("  check <task ID>");
         out.println("  uncheck <task ID>");
+        out.println("  deadline <task ID> <date>");
         out.println();
     }
 
